@@ -49,6 +49,18 @@ The one exception is bulk import, which calls `addTransaction()` in a loop (push
 
 The form section has two panels (`#panel-single`, `#panel-bulk`) toggled by `switchTab()`. The bulk panel has its own type/category dropdowns (`#bulk-type`, `#bulk-category`) independent of the single-entry form. Both use `populateCategoryDropdown(type, selectId)` — the `selectId` parameter defaults to `'input-category'`.
 
+## Git workflow
+
+After every code change, commit and push with a short message:
+
+```
+git add <files>
+git commit -m "short description"
+git push
+```
+
+Remote: https://github.com/Kamil-Kalbarczyk/financial-tracker-app
+
 ## Bulk import format
 
 Textarea expects tab-separated rows: `Amount<TAB>Date` per line. `parseImportText()` strips `$`, `,`, and spaces from the amount column and accepts any date string parseable by `new Date()`, normalizing to ISO format.
