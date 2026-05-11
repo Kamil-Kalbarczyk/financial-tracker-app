@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Budget Tracker</title>
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js" defer></script>
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <header id="app-header">
+    <h1>Budget Tracker</h1>
+  </header>
+
+  <main id="app-main">
+    <section id="summary-section">
+      <div class="card" id="card-income">
+        <span class="card-label">Total Income</span>
+        <span class="card-amount income" id="summary-income">$0.00</span>
+      </div>
+      <div class="card" id="card-expenses">
+        <span class="card-label">Total Expenses</span>
+        <span class="card-amount expense" id="summary-expenses">$0.00</span>
+      </div>
+      <div class="card" id="card-balance">
+        <span class="card-label">Balance</span>
+        <span class="card-amount" id="summary-balance">$0.00</span>
+      </div>
+    </section>
+
+    <section id="form-section">
+      <div id="form-tabs">
+        <button id="tab-single" class="tab active">Single</button>
+        <button id="tab-bulk" class="tab">Bulk Import</button>
+      </div>
+
+      <div id="panel-single">
+        <form id="transaction-form">
+          <div class="form-group">
+            <label for="input-type">Type</label>
+            <select id="input-type">
+              <option value="expense">Expense</option>
+              <option value="income">Income</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="input-description">Description</label>
+            <input id="input-description" type="text" placeholder="e.g. Weekly groceries" />
+          </div>
+          <div class="form-group">
+            <label for="input-amount">Amount ($)</label>
+            <input id="input-amount" type="number" min="0.01" step="0.01" placeholder="0.00" required />
+          </div>
+          <div class="form-group">
+            <label for="input-category">Category</label>
+            <select id="input-category"></select>
+          </div>
+          <div class="form-group">
+            <label for="input-date">Date</label>
+            <input id="input-date" type="date" required />
+          </div>
+          <button type="submit" class="btn-primary">Add Transaction</button>
+        </form>
+      </div>
+
+      <div id="panel-bulk" hidden>
+        <div class="bulk-fields">
+          <div class="form-group">
+            <label for="bulk-type">Type</label>
+            <select id="bulk-type">
+              <option value="expense">Expense</option>
+              <option value="income">Income</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="bulk-category">Category</label>
+            <select id="bulk-category"></select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="bulk-input">Paste from Excel</label>
+          <p class="hint">Two columns per row: Amount &rarr; Date &nbsp;(e.g. <code>47.50&Tab;2026-05-11</code>)</p>
+          <textarea id="bulk-input" rows="8" placeholder="47.50&#9;2026-05-11&#10;120.00&#9;2026-05-10&#10;35.00&#9;2026-05-09"></textarea>
+        </div>
+        <div id="bulk-preview"></div>
+        <button id="btn-bulk-import" class="btn-primary" disabled>Import 0 rows</button>
+      </div>
+    </section>
+
+    <section id="dashboard-section">
+      <div id="chart-container">
+        <h2>Spending by Category</h2>
+        <div id="chart-wrapper">
+          <canvas id="spending-chart"></canvas>
+          <p id="chart-empty">No expense data yet.</p>
+        </div>
+      </div>
+
+      <div id="transactions-container">
+        <h2>Transactions</h2>
+        <div id="filter-bar">
+          <select id="filter-category">
+            <option value="">All Categories</option>
+          </select>
+          <select id="filter-type">
+            <option value="">All Types</option>
+            <option value="income">Income</option>
+            <option value="expense">Expense</option>
+          </select>
+          <input id="filter-date-from" type="date" placeholder="From" />
+          <input id="filter-date-to" type="date" placeholder="To" />
+          <button id="btn-clear-filters" class="btn-secondary">Clear</button>
+        </div>
+        <ul id="transaction-list"></ul>
+        <p id="empty-state">No transactions yet. Add one above!</p>
+      </div>
+    </section>
+  </main>
+</body>
+</html>
