@@ -248,6 +248,24 @@ function handleTypeChange() {
 
 let parsedBulkRows = [];
 
+function parseDate(raw) {
+  // YYYY-MM-DD
+  let m = raw.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (m) {
+    const [, y, mo, d] = m;
+    if (mo >= 1 && mo <= 12 && d >= 1 && d <= 31) return `${y}-${mo}-${d}`;
+  }
+  // M/D/YYYY or MM/DD/YYYY (Excel US locale)
+  m = raw.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+  if (m) {
+    const [, mo, d, y] = m;
+    if (mo >= 1 && mo <= 12 && d >= 1 && d <= 31) {
+      return `${y}-${String(mo).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+    }
+  }
+  return null;
+}
+
 function parseImportText(text) {
   return text
     .split('\n')
@@ -263,13 +281,9 @@ function parseImportText(text) {
         return { row: i + 1, amount: rawAmt, date: rawDate, valid: false, error: 'Invalid amount' };
       }
 
-      let date;
-      try {
-        const d = new Date(rawDate);
-        if (isNaN(d.getTime())) throw new Error();
-        date = d.toISOString().split('T')[0];
-      } catch {
-        return { row: i + 1, amount, date: rawDate, valid: false, error: 'Invalid date' };
+      const date = parseDate(rawDate);
+      if (!date) {
+        return { row: i + 1, amount, date: rawDate, valid: false, error: 'Invalid date (use YYYY-MM-DD or MM/DD/YYYY)' };
       }
 
       return { row: i + 1, amount, date, valid: true, error: '' };
@@ -288,14 +302,18 @@ function renderImportPreview(rows) {
     return;
   }
 
-  const rowsHtml = rows.map(r => `
+  const rowsHtml = rows.map(r => {
+    const safeAmount = typeof r.amount === 'number' ? formatCurrency(r.amount) : escapeHtml(String(r.amount));
+    const safeDate   = escapeHtml(String(r.date));
+    const safeError  = escapeHtml(r.error);
+    return `
     <tr>
       <td>${r.row}</td>
-      <td>${typeof r.amount === 'number' ? formatCurrency(r.amount) : r.amount}</td>
-      <td>${r.date}</td>
-      <td class="${r.valid ? 'preview-valid' : 'preview-invalid'}">${r.valid ? '✓' : '✗ ' + r.error}</td>
-    </tr>
-  `).join('');
+      <td>${safeAmount}</td>
+      <td>${safeDate}</td>
+      <td class="${r.valid ? 'preview-valid' : 'preview-invalid'}">${r.valid ? '✓' : '✗ ' + safeError}</td>
+    </tr>`;
+  }).join('');
 
   container.innerHTML = `
     <table>
@@ -330,12 +348,14 @@ function handleBulkImport() {
   parsedBulkRows = [];
   renderImportPreview([]);
 
+  const existing = document.getElementById('bulk-import-msg');
+  if (existing) existing.remove();
+
   const msg = document.createElement('p');
   msg.id = 'bulk-import-msg';
   msg.textContent = `${valid.length} record${valid.length !== 1 ? 's' : ''} imported.`;
-  const preview = document.getElementById('bulk-preview');
-  preview.appendChild(msg);
-  setTimeout(() => msg.remove(), 3000);
+  document.getElementById('bulk-preview').appendChild(msg);
+  setTimeout(() => { if (msg.parentNode) msg.remove(); }, 3000);
 }
 
 function switchTab(tab) {
@@ -347,7 +367,7 @@ function switchTab(tab) {
 }
 
 function handleFilterChange() {
-  renderTransactionList();
+  renderAll();
 }
 
 function clearFilters() {

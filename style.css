@@ -424,7 +424,8 @@ input:focus, select:focus {
     grid-template-columns: 1fr;
   }
 
-  #transaction-form {
+  #transaction-form,
+  .bulk-fields {
     grid-template-columns: 1fr;
   }
 }
